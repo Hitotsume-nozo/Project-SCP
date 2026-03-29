@@ -1,6 +1,3 @@
-# docker-compose.yml
-version: "3.8"
-
 services:
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v23.3.5
@@ -54,27 +51,18 @@ services:
       redpanda:
         condition: service_healthy
 
-  governance-agent:
-    build: ./governance
-    container_name: governance-agent
+  pollution-generator:
+    build: ./generators
+    container_name: pollution-gen
+    command: python pollution_generator.py
     restart: on-failure
     depends_on:
       redpanda:
         condition: service_healthy
 
-  dashboard:
-    build: ./dashboard
-    container_name: dashboard
-    ports:
-      - "8501:8501"
-    depends_on:
-      - redpanda
-      - governance-agent
-
-  pollution-generator:
-    build: ./generators
-    container_name: pollution-gen
-    command: python pollution_generator.py
+  governance-agent:
+    build: ./governance
+    container_name: governance-agent
     restart: on-failure
     depends_on:
       redpanda:
@@ -88,5 +76,15 @@ services:
     restart: on-failure
     depends_on:
       - minio
+
+  dashboard:
+    build: ./dashboard
+    container_name: dashboard
+    ports:
+      - "8501:8501"
+    depends_on:
+      - analytics-api
+      - governance-agent
+
 volumes:
   minio-data:
