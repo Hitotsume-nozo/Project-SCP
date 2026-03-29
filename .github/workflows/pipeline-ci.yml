@@ -1,0 +1,142 @@
+# .github/workflows/pipeline-ci.yml
+name: Smart City Platform CI/CD
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  # ============================
+  # Stage 1: Unit Tests
+  # ============================
+  unit-tests:
+    name: Governance Agent Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run governance unit tests
+        run: |
+          cd governance
+          python test_governance.py
+
+  # ============================
+  # Stage 2: Container Builds
+  # ============================
+  build:
+    name: Build All Containers
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build traffic generator
+        run: docker build -t smart-city/traffic-gen ./generators
+
+      - name: Build governance agent
+        run: docker build -t smart-city/governance ./governance
+
+      - name: Build analytics API
+        run: docker build -t smart-city/analytics ./analytics
+
+      - name: Build dashboard
+        run: docker build -t smart-city/dashboard ./dashboard
+
+      - name: Verify all images built
+        run: |
+          echo "Built images:"
+          docker images | grep smart-city
+
+  # ============================
+  # Stage 3: Integration Test
+  # ============================
+  integration:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start infrastructure
+        run: |
+          docker compose up -d redpanda minio
+          echo "Waiting for Redpanda to be healthy..."
+          sleep 20
+          docker compose ps
+
+      - name: Start application services
+        run: |
+          docker compose up -d --build
+          echo "Waiting for services to initialize..."
+          sleep 30
+          docker compose ps
+
+      - name: Verify all containers running
+        run: |
+          RUNNING=$(docker compose ps --status running -q | wc -l)
+          TOTAL=$(docker compose ps -q | wc -l)
+          echo "Running: $RUNNING / $TOTAL"
+          if [ "$RUNNING" -lt "$TOTAL" ]; then
+            echo "Some containers failed to start:"
+            docker compose ps
+            docker compose logs governance-agent --tail 20
+            exit 1
+          fi
+
+      - name: Check Analytics API health
+        run: |
+          for i in $(seq 1 10); do
+            if curl -sf http://localhost:8000/ > /dev/null 2>&1; then
+              echo "Analytics API is healthy"
+              curl -s http://localhost:8000/ | python3 -m json.tool
+              exit 0
+            fi
+            echo "Attempt $i: API not ready, waiting..."
+            sleep 5
+          done
+          echo "Analytics API failed to respond"
+          docker logs analytics-api --tail 30
+          exit 1
+
+      - name: Check Dashboard health
+        run: |
+          for i in $(seq 1 10); do
+            if curl -sf http://localhost:8501/ > /dev/null 2>&1; then
+              echo "Dashboard is healthy"
+              exit 0
+            fi
+            echo "Attempt $i: Dashboard not ready, waiting..."
+            sleep 5
+          done
+          echo "Dashboard failed to respond"
+          docker logs dashboard --tail 30
+          exit 1
+
+      - name: Verify data pipeline is flowing
+        run: |
+          echo "Waiting 30s for data to flow through pipeline..."
+          sleep 30
+
+          echo "--- Governance Agent Logs ---"
+          docker logs governance-agent --tail 15
+
+          echo ""
+          echo "--- Checking governance stats ---"
+          curl -s http://localhost:8000/api/v1/governance/stats | python3 -m json.tool
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down -v
