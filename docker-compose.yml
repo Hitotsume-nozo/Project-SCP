@@ -1,0 +1,92 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v23.3.5
+    container_name: redpanda
+    command:
+      - redpanda start
+      - --smp 1
+      - --memory 512M
+      - --overprovisioned
+      - --kafka-addr PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:9092
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health"]
+      interval: 10s
+      retries: 5
+      start_period: 15s
+
+  console:
+    image: docker.redpanda.com/redpandadata/console:v2.3.8
+    container_name: redpanda-console
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_BROKERS=redpanda:9092
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin12345
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+
+  traffic-generator:
+    build: ./generators
+    container_name: traffic-gen
+    command: python traffic_generator.py
+    restart: on-failure
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+  governance-agent:
+    build: ./governance
+    container_name: governance-agent
+    restart: on-failure
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+  dashboard:
+    build: ./dashboard
+    container_name: dashboard
+    ports:
+      - "8501:8501"
+    depends_on:
+      - redpanda
+      - governance-agent
+
+  pollution-generator:
+    build: ./generators
+    container_name: pollution-gen
+    command: python pollution_generator.py
+    restart: on-failure
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+  analytics-api:
+    build: ./analytics
+    container_name: analytics-api
+    ports:
+      - "8000:8000"
+    restart: on-failure
+    depends_on:
+      - minio
+volumes:
+  minio-data:
