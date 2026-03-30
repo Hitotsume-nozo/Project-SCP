@@ -1,9 +1,6 @@
-
-
-```markdown
 <div align="center">
 
-#  Smart City Data Platform
+# Smart City Data Platform
 
 **Automated Data Governance for Urban Traffic & Pollution Monitoring**
 
@@ -32,7 +29,7 @@ A cloud-native streaming data platform that ingests simulated urban IoT sensor d
 
 ---
 
-##  Table of Contents
+## Table of Contents
 
 - [Overview](#-overview)
 - [Quick Start](#-quick-start)
@@ -53,7 +50,7 @@ A cloud-native streaming data platform that ingests simulated urban IoT sensor d
 
 ---
 
-##  Overview
+## Overview
 
 Urban sensor networks generate massive streams of traffic and pollution data. This data frequently contains **Personally Identifiable Information** (PII) — specifically vehicle license plate numbers — that must be protected under regulations like **India's DPDP Act 2023** and **EU's GDPR**.
 
@@ -71,16 +68,16 @@ Raw Sensor Data → Stream Broker → Governance Agent → Governed Data → API
 
 ### Why This Matters
 
-| Problem | Traditional Approach | This Platform |
-|---------|---------------------|---------------|
-| PII in analytics databases | Manual audit (days/weeks) | Automated stream-level governance (microseconds) |
-| Compliance evidence | Retrospective reports | Real-time dashboard with live proof |
-| Detection accuracy | Human error-prone | Deterministic: 100% for configured fields |
-| Open data readiness | Requires separate sanitization pipeline | curated-zone is always safe to publish |
+| Problem                    | Traditional Approach                    | This Platform                                    |
+| -------------------------- | --------------------------------------- | ------------------------------------------------ |
+| PII in analytics databases | Manual audit (days/weeks)               | Automated stream-level governance (microseconds) |
+| Compliance evidence        | Retrospective reports                   | Real-time dashboard with live proof              |
+| Detection accuracy         | Human error-prone                       | Deterministic: 100% for configured fields        |
+| Open data readiness        | Requires separate sanitization pipeline | curated-zone is always safe to publish           |
 
 ---
 
-##  Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -98,14 +95,14 @@ docker compose up -d --build
 
 Wait ~30 seconds for all services to initialize, then:
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| **Dashboard** | [localhost:8501](http://localhost:8501) | — |
-| **API Docs** | [localhost:8000/docs](http://localhost:8000/docs) | — |
-| **Redpanda Console** | [localhost:8080](http://localhost:8080) | — |
-| **MinIO Console** | [localhost:9001](http://localhost:9001) | `admin` / `admin12345` |
-| **Grafana** | [localhost:3000](http://localhost:3000) | `admin` / `admin` |
-| **Prometheus** | [localhost:9090](http://localhost:9090) | — |
+| Service              | URL                                               | Credentials            |
+| -------------------- | ------------------------------------------------- | ---------------------- |
+| **Dashboard**        | [localhost:8501](http://localhost:8501)           | —                      |
+| **API Docs**         | [localhost:8000/docs](http://localhost:8000/docs) | —                      |
+| **Redpanda Console** | [localhost:8080](http://localhost:8080)           | —                      |
+| **MinIO Console**    | [localhost:9001](http://localhost:9001)           | `admin` / `admin12345` |
+| **Grafana**          | [localhost:3000](http://localhost:3000)           | `admin` / `admin`      |
+| **Prometheus**       | [localhost:9090](http://localhost:9090)           | —                      |
 
 ### Verify Everything Works
 
@@ -135,7 +132,7 @@ docker compose down -v
 
 ---
 
-##  Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -185,9 +182,10 @@ docker compose down -v
 
 ---
 
-##  Features
+## Features
 
 ### Data Governance
+
 - **Deterministic PII detection** — field-level matching against configured PII registry
 - **SHA-256 hashing** — irreversible, deterministic, analytically useful
 - **100% detection rate** for configured fields (zero false negatives)
@@ -195,23 +193,27 @@ docker compose down -v
 - **Governance metadata** — every record tagged with `pii_detected` and `governed_at`
 
 ### Stream Processing
+
 - **Kafka-compatible streaming** via Redpanda (low memory, fast startup)
 - **Concurrent processing** — traffic and pollution governed in parallel threads
 - **Real-time throughput** — governance applied in microseconds per record
 
 ### Analytics & Visualization
+
 - **10 REST endpoints** with auto-generated Swagger documentation
 - **5-page dashboard** — Command Center, Traffic, Pollution, Governance Audit, System
 - **Time-series analysis** — traffic volume and AQI trends over time
 - **Alert classification** — NORMAL / WARNING / CRITICAL based on AQI thresholds
 
 ### Security & Compliance
+
 - **Zone-separated storage** with distinct access policies
 - **IAM role matrix** — least privilege access per role
 - **Encryption at rest** — KMS for raw-zone, standard for curated-zone
 - **Audit trail** — every original record preserved in raw-zone
 
 ### DevOps
+
 - **Single-command deployment** — `docker compose up -d --build`
 - **20 unit tests** across 4 test suites
 - **CI/CD pipeline** via GitHub Actions (test → build → integration)
@@ -219,24 +221,24 @@ docker compose down -v
 
 ---
 
-##  Services
+## Services
 
-| Container | Technology | Port | Purpose |
-|-----------|-----------|------|---------|
-| `redpanda` | Redpanda v23.3.5 | 9092 | Kafka-compatible message broker |
-| `redpanda-console` | Redpanda Console v2.3.8 | 8080 | Broker management UI |
-| `minio` | MinIO latest | 9000/9001 | S3-compatible object storage |
-| `traffic-gen` | Python 3.11 | — | Simulated traffic camera data |
-| `pollution-gen` | Python 3.11 | — | Simulated air quality sensors |
-| `governance-agent` | Python 3.11 | — | PII detection + SHA-256 hashing |
-| `analytics-api` | FastAPI | 8000 | REST API + Swagger + Prometheus metrics |
-| `dashboard` | Streamlit | 8501 | 5-page interactive dashboard |
-| `prometheus` | Prometheus | 9090 | Metrics collection |
-| `grafana` | Grafana | 3000 | Metrics visualization |
+| Container          | Technology              | Port      | Purpose                                 |
+| ------------------ | ----------------------- | --------- | --------------------------------------- |
+| `redpanda`         | Redpanda v23.3.5        | 9092      | Kafka-compatible message broker         |
+| `redpanda-console` | Redpanda Console v2.3.8 | 8080      | Broker management UI                    |
+| `minio`            | MinIO latest            | 9000/9001 | S3-compatible object storage            |
+| `traffic-gen`      | Python 3.11             | —         | Simulated traffic camera data           |
+| `pollution-gen`    | Python 3.11             | —         | Simulated air quality sensors           |
+| `governance-agent` | Python 3.11             | —         | PII detection + SHA-256 hashing         |
+| `analytics-api`    | FastAPI                 | 8000      | REST API + Swagger + Prometheus metrics |
+| `dashboard`        | Streamlit               | 8501      | 5-page interactive dashboard            |
+| `prometheus`       | Prometheus              | 9090      | Metrics collection                      |
+| `grafana`          | Grafana                 | 3000      | Metrics visualization                   |
 
 ---
 
-##  Data Governance
+## Data Governance
 
 ### How It Works
 
@@ -254,36 +256,36 @@ PII_FIELDS = ["license_plates"]
 
 ### Transformation Example
 
-| Field | Raw (raw-zone) | Governed (curated-zone) |
-|-------|----------------|------------------------|
-| `license_plates[0]` | `AB-1234-CD` | `a3f2b8c91d4e` |
-| `license_plates[1]` | `EF-5678-GH` | `7bc1e9f3a2d8` |
-| `pii_detected` | *(absent)* | `true` |
-| `governed_at` | *(absent)* | `2025-03-29T21:04:15` |
+| Field               | Raw (raw-zone) | Governed (curated-zone) |
+| ------------------- | -------------- | ----------------------- |
+| `license_plates[0]` | `AB-1234-CD`   | `a3f2b8c91d4e`          |
+| `license_plates[1]` | `EF-5678-GH`   | `7bc1e9f3a2d8`          |
+| `pii_detected`      | _(absent)_     | `true`                  |
+| `governed_at`       | _(absent)_     | `2025-03-29T21:04:15`   |
 
 ### Why Deterministic Rules (Not LLM)
 
-| Criterion | Deterministic Rules | LLM Detection |
-|-----------|-------------------|---------------|
+| Criterion           | Deterministic Rules        | LLM Detection            |
+| ------------------- | -------------------------- | ------------------------ |
 | False negative rate | **0%** (configured fields) | Non-zero (hallucination) |
-| Latency | Microseconds | 2–5 seconds |
-| Auditability | Fully transparent | Black box |
-| Legal defensibility | High | Uncertain |
-| Testability | 20 unit tests | Difficult |
-| Resources | Minimal | 4–8 GB RAM |
+| Latency             | Microseconds               | 2–5 seconds              |
+| Auditability        | Fully transparent          | Black box                |
+| Legal defensibility | High                       | Uncertain                |
+| Testability         | 20 unit tests              | Difficult                |
+| Resources           | Minimal                    | 4–8 GB RAM               |
 
 ### Storage Zone Separation
 
-| Property | `raw-zone` | `curated-zone` |
-|----------|-----------|----------------|
-| Contains PII | Yes (original) | No (hashed) |
-| Access | Restricted: governance agent + compliance officers | Open: analysts, APIs, dashboard |
-| Purpose | Legal audit trail | Business analytics |
-| Cloud target | S3 + KMS + restrictive IAM | S3 + standard IAM |
+| Property     | `raw-zone`                                         | `curated-zone`                  |
+| ------------ | -------------------------------------------------- | ------------------------------- |
+| Contains PII | Yes (original)                                     | No (hashed)                     |
+| Access       | Restricted: governance agent + compliance officers | Open: analysts, APIs, dashboard |
+| Purpose      | Legal audit trail                                  | Business analytics              |
+| Cloud target | S3 + KMS + restrictive IAM                         | S3 + standard IAM               |
 
 ---
 
-##  API Reference
+## API Reference
 
 Base URL: `http://localhost:8000`
 
@@ -291,34 +293,34 @@ Interactive docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ### Governance
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/v1/governance/stats` | Pipeline statistics and compliance metrics |
-| `GET` | `/api/v1/governance/comparison` | Side-by-side raw vs governed data sample |
-| `GET` | `/api/v1/governance/timeline` | Governance activity aggregated by minute |
+| Method | Endpoint                        | Description                                |
+| ------ | ------------------------------- | ------------------------------------------ |
+| `GET`  | `/api/v1/governance/stats`      | Pipeline statistics and compliance metrics |
+| `GET`  | `/api/v1/governance/comparison` | Side-by-side raw vs governed data sample   |
+| `GET`  | `/api/v1/governance/timeline`   | Governance activity aggregated by minute   |
 
 ### Traffic
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/v1/traffic/summary` | Traffic aggregates by district |
-| `GET` | `/api/v1/traffic/latest?limit=25` | Most recent governed traffic records |
-| `GET` | `/api/v1/traffic/timeseries` | Traffic metrics over time by district |
+| Method | Endpoint                          | Description                           |
+| ------ | --------------------------------- | ------------------------------------- |
+| `GET`  | `/api/v1/traffic/summary`         | Traffic aggregates by district        |
+| `GET`  | `/api/v1/traffic/latest?limit=25` | Most recent governed traffic records  |
+| `GET`  | `/api/v1/traffic/timeseries`      | Traffic metrics over time by district |
 
 ### Pollution
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/v1/pollution/summary` | Pollution aggregates by district |
-| `GET` | `/api/v1/pollution/alerts?limit=30` | Active alerts with severity |
-| `GET` | `/api/v1/pollution/latest?limit=25` | Most recent governed pollution records |
-| `GET` | `/api/v1/pollution/timeseries` | AQI and PM2.5 trends over time |
+| Method | Endpoint                            | Description                            |
+| ------ | ----------------------------------- | -------------------------------------- |
+| `GET`  | `/api/v1/pollution/summary`         | Pollution aggregates by district       |
+| `GET`  | `/api/v1/pollution/alerts?limit=30` | Active alerts with severity            |
+| `GET`  | `/api/v1/pollution/latest?limit=25` | Most recent governed pollution records |
+| `GET`  | `/api/v1/pollution/timeseries`      | AQI and PM2.5 trends over time         |
 
 ### Observability
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/metrics` | Prometheus-compatible metrics |
+| Method | Endpoint   | Description                   |
+| ------ | ---------- | ----------------------------- |
+| `GET`  | `/metrics` | Prometheus-compatible metrics |
 
 ### Example
 
@@ -340,19 +342,19 @@ curl -s http://localhost:8000/api/v1/governance/stats | python3 -m json.tool
 
 ---
 
-##  Dashboard
+## Dashboard
 
 5-page Streamlit dashboard at [localhost:8501](http://localhost:8501):
 
 ### Pages
 
-| Page | Target User | Key Features |
-|------|-------------|-------------|
-| **Command Center** | City Administrator | KPIs, compliance gauge, pipeline timeline, district cards |
-| **Traffic Intelligence** | Traffic Engineer | Vehicle density, speed charts, congestion progress bars |
-| **Air Quality Monitor** | Environmental Officer | AQI bars, PM2.5 comparison, alert feed, health cards |
-| **Governance Audit** | Compliance Officer | Raw vs governed evidence, pipeline flow, detection rules |
-| **System & API** | Developer | Architecture table, API explorer, cloud mapping |
+| Page                     | Target User           | Key Features                                              |
+| ------------------------ | --------------------- | --------------------------------------------------------- |
+| **Command Center**       | City Administrator    | KPIs, compliance gauge, pipeline timeline, district cards |
+| **Traffic Intelligence** | Traffic Engineer      | Vehicle density, speed charts, congestion progress bars   |
+| **Air Quality Monitor**  | Environmental Officer | AQI bars, PM2.5 comparison, alert feed, health cards      |
+| **Governance Audit**     | Compliance Officer    | Raw vs governed evidence, pipeline flow, detection rules  |
+| **System & API**         | Developer             | Architecture table, API explorer, cloud mapping           |
 
 <!--
 ### Screenshots
@@ -366,19 +368,19 @@ Add screenshots here:
 
 ---
 
-##  Monitoring
+## Monitoring
 
 ### Prometheus Metrics
 
 The analytics API exports metrics at `/metrics`:
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `pipeline_records_total` | Gauge | Records by zone and data type |
-| `governance_pii_detected_total` | Gauge | Total PII records hashed |
-| `pollution_alerts_active` | Gauge | Current alerts by severity |
-| `api_requests_total` | Counter | Request count by endpoint |
-| `api_request_duration_seconds` | Histogram | Request latency distribution |
+| Metric                          | Type      | Description                   |
+| ------------------------------- | --------- | ----------------------------- |
+| `pipeline_records_total`        | Gauge     | Records by zone and data type |
+| `governance_pii_detected_total` | Gauge     | Total PII records hashed      |
+| `pollution_alerts_active`       | Gauge     | Current alerts by severity    |
+| `api_requests_total`            | Counter   | Request count by endpoint     |
+| `api_request_duration_seconds`  | Histogram | Request latency distribution  |
 
 ### Grafana Dashboard
 
@@ -387,6 +389,7 @@ Access Grafana at [localhost:3000](http://localhost:3000) (`admin`/`admin`).
 Add Prometheus data source: `http://prometheus:9090`
 
 Useful queries:
+
 ```promql
 pipeline_records_total
 governance_pii_detected_total
@@ -397,7 +400,7 @@ histogram_quantile(0.95, rate(api_request_duration_seconds_bucket[5m]))
 
 ---
 
-##  Testing
+## Testing
 
 ### Unit Tests
 
@@ -461,7 +464,7 @@ Measures sustained pipeline throughput by observing record accumulation over tim
 
 ---
 
-##  CI/CD Pipeline
+## CI/CD Pipeline
 
 GitHub Actions pipeline with 3 stages:
 
@@ -480,26 +483,26 @@ Pipeline definition: [`.github/workflows/pipeline-ci.yml`](.github/workflows/pip
 
 ---
 
-##  Security
+## Security
 
 ### IAM Role Access Matrix
 
-| Role | raw-zone | curated-zone | API | Dashboard |
-|------|----------|-------------|-----|-----------|
-| Governance Agent | Read/Write | Write | — | — |
-| Compliance Officer | Read | Read | Read | Read |
-| Data Analyst | **Denied** | Read | Read | Read |
-| API Consumer | **Denied** | Read | Read | — |
-| Public | **Denied** | **Denied** | Read (governed) | View |
+| Role               | raw-zone   | curated-zone | API             | Dashboard |
+| ------------------ | ---------- | ------------ | --------------- | --------- |
+| Governance Agent   | Read/Write | Write        | —               | —         |
+| Compliance Officer | Read       | Read         | Read            | Read      |
+| Data Analyst       | **Denied** | Read         | Read            | Read      |
+| API Consumer       | **Denied** | Read         | Read            | —         |
+| Public             | **Denied** | **Denied**   | Read (governed) | View      |
 
 ### Encryption
 
-| Layer | Mechanism | Details |
-|-------|-----------|---------|
-| Data at Rest (raw-zone) | AES-256 / KMS | Customer-managed key, 90-day rotation |
-| Data at Rest (curated-zone) | AES-256 / SSE | Standard managed encryption |
-| Data in Transit | TLS 1.3 | All inter-service communication |
-| PII (Application) | SHA-256 | Irreversible cryptographic hash |
+| Layer                       | Mechanism     | Details                               |
+| --------------------------- | ------------- | ------------------------------------- |
+| Data at Rest (raw-zone)     | AES-256 / KMS | Customer-managed key, 90-day rotation |
+| Data at Rest (curated-zone) | AES-256 / SSE | Standard managed encryption           |
+| Data in Transit             | TLS 1.3       | All inter-service communication       |
+| PII (Application)           | SHA-256       | Irreversible cryptographic hash       |
 
 ---
 
@@ -507,22 +510,22 @@ Pipeline definition: [`.github/workflows/pipeline-ci.yml`](.github/workflows/pip
 
 Every local component maps to a managed cloud service:
 
-| Local | AWS | Azure | Advantage |
-|-------|-----|-------|-----------|
-| Redpanda | Kinesis Data Streams | Event Hubs | Auto-scaling shards |
-| Python Generators | IoT Core + Rules | IoT Hub | Managed device registry |
-| Governance Agent | Lambda / ECS Fargate | Functions / ACI | Auto-scaling containers |
-| MinIO | S3 + KMS | Blob Storage + Key Vault | Unlimited, encrypted |
-| FastAPI | API Gateway + Lambda | API Management | Serverless, rate-limited |
-| Streamlit | ECS + ALB | Container Apps | Managed hosting |
-| Prometheus | CloudWatch Metrics | Azure Monitor | Managed collection |
-| Grafana | CloudWatch Dashboards | Azure Dashboards | No infrastructure |
+| Local             | AWS                   | Azure                    | Advantage                |
+| ----------------- | --------------------- | ------------------------ | ------------------------ |
+| Redpanda          | Kinesis Data Streams  | Event Hubs               | Auto-scaling shards      |
+| Python Generators | IoT Core + Rules      | IoT Hub                  | Managed device registry  |
+| Governance Agent  | Lambda / ECS Fargate  | Functions / ACI          | Auto-scaling containers  |
+| MinIO             | S3 + KMS              | Blob Storage + Key Vault | Unlimited, encrypted     |
+| FastAPI           | API Gateway + Lambda  | API Management           | Serverless, rate-limited |
+| Streamlit         | ECS + ALB             | Container Apps           | Managed hosting          |
+| Prometheus        | CloudWatch Metrics    | Azure Monitor            | Managed collection       |
+| Grafana           | CloudWatch Dashboards | Azure Dashboards         | No infrastructure        |
 
 **Estimated cloud cost:** ~$114/month (AWS, moderate load)
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```
 smart-city-platform/
@@ -571,7 +574,7 @@ smart-city-platform/
 
 ---
 
-##  Troubleshooting
+## Troubleshooting
 
 ### Containers won't start
 
@@ -634,7 +637,7 @@ cd governance && python test_governance.py
 
 ---
 
-##  Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/your-feature`)
