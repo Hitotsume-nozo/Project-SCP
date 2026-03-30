@@ -6,6 +6,31 @@ from fastapi.middleware.cors import CORSMiddleware
 from minio import Minio
 from datetime import datetime, timedelta
 import pandas as pd
+from prometheus_client import Counter, Histogram, Gauge, generate_latest
+from starlette.responses import Response
+import time as time_module
+
+
+# === PROMETHEUS METRICS ===
+REQUEST_COUNT = Counter(
+    "api_requests_total", "Total API requests", ["endpoint", "method"]
+)
+
+REQUEST_LATENCY = Histogram(
+    "api_request_duration_seconds", "API request latency", ["endpoint"]
+)
+
+RECORDS_GAUGE = Gauge(
+    "pipeline_records_total", "Total records in storage", ["zone", "data_type"]
+)
+
+PII_DETECTED = Gauge(
+    "governance_pii_detected_total", "Total PII records detected and hashed"
+)
+
+ALERTS_ACTIVE = Gauge(
+    "pollution_alerts_active", "Currently active pollution alerts", ["severity"]
+)
 
 sys.stdout.reconfigure(line_buffering=True)
 
@@ -21,6 +46,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def track_requests(request, call_next):
+    start = time_module.time()
+    response = await call_next(request)
+    duration = time_module.time() - start
+
+    endpoint = request.url.path
+    REQUEST_COUNT.labels(endpoint=endpoint, method=request.method).inc()
+    REQUEST_LATENCY.labels(endpoint=endpoint).observe(duration)
+
+    return response
 
 
 def get_minio():
@@ -57,7 +95,7 @@ def count_objects(bucket, prefix):
         return 0
 
 
-# ========== HEALTH ==========
+# ========== HEALTH ============
 @app.get("/")
 def root():
     return {
@@ -66,6 +104,32 @@ def root():
         "status": "running",
         "timestamp": datetime.utcnow().isoformat(),
     }
+
+
+@app.get("/metrics")
+def metrics():
+    """Prometheus metrics endpoint"""
+    # Update gauges with current data
+    try:
+        traffic = load_records("curated-zone", "traffic/", limit=1000)
+        pollution = load_records("curated-zone", "pollution/", limit=1000)
+        raw_traffic = count_objects("raw-zone", "traffic/")
+
+        RECORDS_GAUGE.labels(zone="curated", data_type="traffic").set(len(traffic))
+        RECORDS_GAUGE.labels(zone="curated", data_type="pollution").set(len(pollution))
+        RECORDS_GAUGE.labels(zone="raw", data_type="traffic").set(raw_traffic)
+
+        pii_count = sum(1 for r in traffic if r.get("pii_detected"))
+        PII_DETECTED.set(pii_count)
+
+        critical = sum(1 for r in pollution if r.get("alert_level") == "CRITICAL")
+        warning = sum(1 for r in pollution if r.get("alert_level") == "WARNING")
+        ALERTS_ACTIVE.labels(severity="critical").set(critical)
+        ALERTS_ACTIVE.labels(severity="warning").set(warning)
+    except:
+        pass
+
+    return Response(content=generate_latest(), media_type="text/plain")
 
 
 # ========== GOVERNANCE ==========

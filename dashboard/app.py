@@ -223,13 +223,13 @@ if page == "Command Center":
     with col1:
         st.metric("Traffic Records", f"{stats.get('traffic_records_processed', 0):,}")
     with col2:
-        st.metric("PII Intercepted", f"{stats.get('pii_detected_and_hashed', 0):,}")
+        st.metric("PII Intercepted", f"{stats.get('traffic_records_with_pii', 0):,}")
     with col3:
         st.metric(
             "Pollution Records", f"{stats.get('pollution_records_processed', 0):,}"
         )
     with col4:
-        st.metric("Active Alerts", f"{stats.get('pollution_alerts', 0):,}")
+        st.metric("Active Alerts", f"{stats.get('pollution_alerts_total', 0):,}")
     with col5:
         st.metric("Compliance Rate", "100%")
 
@@ -298,7 +298,7 @@ if page == "Command Center":
         st.markdown("### Governance Pipeline")
 
         total = stats.get("traffic_records_processed", 0)
-        pii = stats.get("pii_detected_and_hashed", 0)
+        pii = stats.get("traffic_records_with_pii", 0)
 
         # Compliance gauge
         fig = go.Figure(
@@ -762,7 +762,7 @@ elif page == "Governance Audit":
             "Total Records Scanned", f"{stats.get('traffic_records_processed', 0):,}"
         )
     with col2:
-        st.metric("PII Fields Detected", f"{stats.get('pii_detected_and_hashed', 0):,}")
+        st.metric("PII Fields Detected", f"{stats.get('traffic_records_with_pii', 0):,}")
     with col3:
         st.metric("Compliance Violations", "0")
 
